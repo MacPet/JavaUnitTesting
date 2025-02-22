@@ -27,7 +27,7 @@ public class Stepdefs {
 
     @When("I create an account using name: {string}, last name: {string}, pesel: {string}")
     public void iCreateAnAccountUsingNameLastNamePesel(String name, String lastName, String pesel) {
-        KontoOsobiste kontoOsobiste = new KontoOsobiste(name, lastName, pesel, "", 0, new double[]{}, null);
+        PrivateAccount kontoOsobiste = new PrivateAccount(name, lastName, pesel, "", 0, new double[]{}, null);
         newAccountRegistry.add(kontoOsobiste);
     }
 
@@ -39,16 +39,16 @@ public class Stepdefs {
     @When("I update {string} of account with pesel: {string} to {string}")
     public void iUpdateOfAccountWithPeselTo(String key, String pesel, String newValue) {
 
-        KontoOsobiste kontoOsobiste = newAccountRegistry.getByPesel(pesel).get(0);
+        PrivateAccount kontoOsobiste = newAccountRegistry.getByPesel(pesel).get(0);
         assertNotNull(kontoOsobiste);
 
         switch (key) {
             case "name" -> {
-                kontoOsobiste.setImie(newValue);
-                assertEquals( newValue, kontoOsobiste.getImie(),"Name was supposed to be modified but wasnt.");}
+                kontoOsobiste.setName(newValue);
+                assertEquals( newValue, kontoOsobiste.getName(),"Name was supposed to be modified but wasnt.");}
             case "surname" -> {
-                kontoOsobiste.setNazwisko(newValue);
-                 assertEquals( newValue, kontoOsobiste.getNazwisko(),"Name was supposed to be modified but wasnt.");}
+                kontoOsobiste.setSurname(newValue);
+                 assertEquals( newValue, kontoOsobiste.getSurname(),"Name was supposed to be modified but wasnt.");}
             default -> fail("Unrecognized value passed");
 
         }
@@ -59,15 +59,15 @@ public class Stepdefs {
     public void accountWithPeselHasEqualTo(String pesel, String key, String value) {
 
 
-        List<KontoOsobiste> kontaOsobiste = newAccountRegistry.getByPesel(pesel);
-        KontoOsobiste konto1 = kontaOsobiste.get(0);
-        KontoOsobiste konto2 = kontaOsobiste.get(1);
+        List<PrivateAccount> kontaOsobiste = newAccountRegistry.getByPesel(pesel);
+        PrivateAccount konto1 = kontaOsobiste.get(0);
+        PrivateAccount konto2 = kontaOsobiste.get(1);
         assertNotEquals(0, kontaOsobiste.size());
 
 
         switch (key) {
-            case "name" -> assertTrue(konto1.getImie().equals(value) || konto2.getImie().equals(value),"Name wasnt equal given value.");
-            case "surname" -> assertTrue(konto1.getNazwisko().equals(value) || konto2.getNazwisko().equals(value),"Name wasnt equal given value.");
+            case "name" -> assertTrue(konto1.getName().equals(value) || konto2.getName().equals(value),"Name wasnt equal given value.");
+            case "surname" -> assertTrue(konto1.getSurname().equals(value) || konto2.getSurname().equals(value),"Name wasnt equal given value.");
             default -> fail("Unrecognized value passed into test");}
 
     }
@@ -86,7 +86,7 @@ public class Stepdefs {
     @Given("Number of accounts with pesel {string} is one")
     public void numberOfAccountsWithPeselEquals(String pesel) {
 
-        KontoOsobiste kontoOsobiste = new KontoOsobiste("ala", "bala", pesel);
+        PrivateAccount kontoOsobiste = new PrivateAccount("ala", "bala", pesel);
         newAccountRegistry.add(kontoOsobiste);
         assertNotNull(newAccountRegistry.getByPesel(pesel));
 
@@ -105,11 +105,11 @@ public class Stepdefs {
     }
 
     public static class moneyTransferFeatures{
-        KontoOsobiste testingAccount =
-                new KontoOsobiste("test", "test", "12332112332", "BRAK_KODU");
+        PrivateAccount testingAccount =
+                new PrivateAccount("test", "test", "12332112332", "BRAK_KODU");
 
-        KontoOsobiste testingAccount2 =
-                new KontoOsobiste("test", "test", "12332112333", "BRAK_KODU");
+        PrivateAccount testingAccount2 =
+                new PrivateAccount("test", "test", "12332112333", "BRAK_KODU");
 
 //
 //        @Given("Account's history is empty")
@@ -120,39 +120,39 @@ public class Stepdefs {
 
         @Given("Account has {double} zloty")
         public void accountHasZloty(double money) {
-        testingAccount.setSaldo(money);
-        assertEquals(money, testingAccount.getSaldo());
+        testingAccount.setBalance(money);
+        assertEquals(money, testingAccount.getBalance());
         }
 
         @Then("Different account has {double} zloty")
         public void differentAccountHasZloty(double money) {
-            assertEquals(money, testingAccount2.getSaldo());
+            assertEquals(money, testingAccount2.getBalance());
         }
 
 
         @When("User transfers {double} zloty to a different account")
         public void userTransferToDifferentAccount(double amount) {
-        testingAccount.przelew(testingAccount2, amount);
+        testingAccount.transfer(testingAccount2, amount);
         }
 
 
         @When("User express transfers {double} zloty to a different account")
         public void userExpressTransferToDifferentAccount(double amount) {
-            testingAccount.przelewEkspresowy(testingAccount2, amount);
+            testingAccount.transferExpress(testingAccount2, amount);
         }
 
 
         @Then("I can borrow {string}")
         public void iCanBorrow(String money){
-        double startingMoney = testingAccount.getSaldo();
+        double startingMoney = testingAccount.getBalance();
         double loanAmount = Double.parseDouble(money);
-        testingAccount.zaciagnijKredyt(loanAmount);
-        assertEquals(startingMoney + loanAmount, testingAccount.getSaldo());
+        testingAccount.loan(loanAmount);
+        assertEquals(startingMoney + loanAmount, testingAccount.getBalance());
         }
 
         @Then("Last entry in account's history is {double}")
         public void lastEntryInAccountSHistoryIs(double lastValue) {
-        double[] history = testingAccount.getHistoria();
+        double[] history = testingAccount.getHistory();
         assertEquals(lastValue, history[history.length - 1]);
 
         }

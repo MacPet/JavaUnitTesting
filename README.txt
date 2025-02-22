@@ -5,12 +5,12 @@ Junit 5,
 Spring boot,
 Mockito 5,
 Gherkin,
-PostgreSQL
+PostgreSQL,
+Lombok
 
 Used this project to learn the basics of unit testing, behaviour-driven development and test-driven development.
 Also used it as an opportunity to learn more about the Java ecosystem.
 
-Parts of the project may currently be untranslated from Polish.
 
 Project may require a local installation of maven or an IDE equipped with maven to be build.
 I personally used Intellij.

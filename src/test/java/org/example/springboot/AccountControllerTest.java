@@ -1,8 +1,7 @@
 package org.example.springboot;
 
-import org.example.Konto;
 import org.example.newAccountRegistry;
-import org.example.KontoOsobiste;
+import org.example.PrivateAccount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,8 +13,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class AccountControllerTest {
 
     AccountController controller = new AccountController();
-    KontoOsobiste testAccount = new KontoOsobiste("a", "a", "12312312312");
-    double saldoBeforeTransfer = testAccount.getSaldo();
+    PrivateAccount testAccount = new PrivateAccount("a", "a", "12312312312");
+    double saldoBeforeTransfer = testAccount.getBalance();
 
     @BeforeEach
     void setUp(){
@@ -39,17 +38,17 @@ class AccountControllerTest {
     @Test
     void checkGet(){
         newAccountRegistry.add(testAccount);
-        assertEquals(testAccount.getImie(), controller.findAccount(testAccount.getPesel()).getImie());
+        assertEquals(testAccount.getName(), controller.findAccount(testAccount.getPesel()).getName());
     }
 
     @Test
     void checkPost(){
     controller.newAccount(testAccount);
-    List<KontoOsobiste> accountsOfSamePesel = newAccountRegistry.getByPesel(testAccount.getPesel());
-    KontoOsobiste lastAccount = accountsOfSamePesel.get(accountsOfSamePesel.size() - 1);
+    List<PrivateAccount> accountsOfSamePesel = newAccountRegistry.getByPesel(testAccount.getPesel());
+    PrivateAccount lastAccount = accountsOfSamePesel.get(accountsOfSamePesel.size() - 1);
 
-    assertEquals(lastAccount.getImie(), testAccount.getImie(), "Controller POST function didnt add an account to registry");
-    assertEquals(lastAccount.getImie(), testAccount.getNazwisko(), "Controller POST function didnt add an account to registry");
+    assertEquals(lastAccount.getName(), testAccount.getName(), "Controller POST function didnt add an account to registry");
+    assertEquals(lastAccount.getName(), testAccount.getSurname(), "Controller POST function didnt add an account to registry");
 
 
     }
@@ -125,8 +124,8 @@ class AccountControllerTest {
 
 
         controller.transferMoney(new Transfer("incoming", 1000), testAccount.getPesel());
-        KontoOsobiste updatedAccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
-        assertEquals(saldoBeforeTransfer + 1000, updatedAccount.getSaldo());
+        PrivateAccount updatedAccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
+        assertEquals(saldoBeforeTransfer + 1000, updatedAccount.getBalance());
 
 
     }
@@ -134,38 +133,27 @@ class AccountControllerTest {
     @Test
     void transferOutgoingMustWork(){
 
-        testAccount.setSaldo(10);
+        testAccount.setBalance(10);
         newAccountRegistry.add(testAccount);
 
 
         controller.transferMoney(new Transfer("outgoing", 10), testAccount.getPesel());
-        KontoOsobiste updatedAccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
-        assertEquals(0, updatedAccount.getSaldo());
+        PrivateAccount updatedAccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
+        assertEquals(0, updatedAccount.getBalance());
 
     }
 
     @Test
     void transferExpressgMustWork(){
 
-        testAccount.setSaldo(10);
+        testAccount.setBalance(10);
         newAccountRegistry.add(testAccount);
 
 
         controller.transferMoney(new Transfer("express", 10), testAccount.getPesel());
-        KontoOsobiste updatedACccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
-        assertEquals(-testAccount.getKOSZTPRZELEWUEKSPRES(), updatedACccount.getSaldo());
+        PrivateAccount updatedACccount = newAccountRegistry.getByPesel(testAccount.getPesel()).get(0);
+        assertEquals(-testAccount.getExpressTransferCost(), updatedACccount.getBalance());
 
     }
-
-
-
-
-
-
-
-
-//TODO: Z ACCOUNTCONTROLLER USUN TESTOWY ACCOUNT I SPRAWDZ CZY MOZNA UZYWAC 2 INPUTOWYCH WARTOSCI W CURLU
-//TODO: SPRAWDZ NESTED ABY UNIKAC POWTORZEN
-    //TODO: SPRAW ZEBY UPDATEY Z CONTROLLERA UPDATEAOWALY TEZ OBIEKT
 
 }

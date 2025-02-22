@@ -27,20 +27,20 @@ public class newAccountRegistry {
         }
     }
 
-    public static void add(KontoOsobiste account) {
+    public static void add(PrivateAccount account) {
 
-        double[] history = account.getHistoria();
+        double[] history = account.getHistory();
 
 
         String query = "INSERT INTO private_accounts (name, surname, pesel, coupon, balance, history) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-            statement.setString(1, account.getImie());
-            statement.setString(2, account.getNazwisko());
+            statement.setString(1, account.getName());
+            statement.setString(2, account.getSurname());
             statement.setString(3, account.getPesel());
-            statement.setString(4, account.getKupon());
-            statement.setDouble(5, account.getSaldo());
+            statement.setString(4, account.getCoupon());
+            statement.setDouble(5, account.getBalance());
             statement.setArray(6, connection.createArrayOf("DOUBLE", convertToDoubleArray(history)));
 
             int affectedRows = statement.executeUpdate();
@@ -60,24 +60,24 @@ public class newAccountRegistry {
     }
 
 
-    public static void update(KontoOsobiste account) {
+    public static void update(PrivateAccount account) {
         if(account.getDatabaseID() == null){
             System.out.println("Update of account failed - unknown account id.");
              return;
         }
 
-        double[] history = account.getHistoria();
+        double[] history = account.getHistory();
 
         String query = "UPDATE private_accounts SET name = ?, surname = ?, pesel = ?, coupon = ?, balance = ?, history = ? WHERE id = ?";
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
 
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, account.getImie());
-            statement.setString(2, account.getNazwisko());
+            statement.setString(1, account.getName());
+            statement.setString(2, account.getSurname());
             statement.setString(3, account.getPesel());
-            statement.setString(4, account.getKupon());
-            statement.setDouble(5, account.getSaldo());
+            statement.setString(4, account.getCoupon());
+            statement.setDouble(5, account.getBalance());
             statement.setArray(6,  connection.createArrayOf("DOUBLE", convertToDoubleArray(history)));
             statement.setInt(7, account.getDatabaseID());
             statement.executeUpdate();
@@ -118,8 +118,8 @@ public class newAccountRegistry {
 //    }
 
 
-    public static List<KontoOsobiste> getByPesel(String pesel) {
-        List<KontoOsobiste> result = new ArrayList<>();
+    public static List<PrivateAccount> getByPesel(String pesel) {
+        List<PrivateAccount> result = new ArrayList<>();
         String query = "SELECT id, name, surname, pesel, coupon, balance, history FROM private_accounts WHERE pesel = ?";
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -132,7 +132,7 @@ public class newAccountRegistry {
                     Double[] doubleArray = (Double[]) historyArray.getArray();
                     double[] history = Arrays.stream(doubleArray).mapToDouble(Double::doubleValue).toArray();
 
-                    result.add(new KontoOsobiste(
+                    result.add(new PrivateAccount(
                             set.getString("name"),
                             set.getString("surname"),
                             set.getString("pesel"),
@@ -174,13 +174,13 @@ public class newAccountRegistry {
         }
     }
 
-    public static KontoOsobiste getLast() {
+    public static PrivateAccount getLast() {
         String query =
                 "SELECT id, name, surname, pesel, coupon, balance, history \n" +
                 "FROM private_accounts \n" +
                 "ORDER BY id DESC \n" +
                 "LIMIT 1";
-        KontoOsobiste account = null;
+        PrivateAccount account = null;
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement statement = connection.prepareStatement(query)) {
 
@@ -193,7 +193,7 @@ public class newAccountRegistry {
                 Double[] doubleArray = (Double[]) historyArray.getArray();
                 double[] history = Arrays.stream(doubleArray).mapToDouble(Double::doubleValue).toArray();
 
-                account = new KontoOsobiste(
+                account = new PrivateAccount(
                         results.getString("name"),
                         results.getString("surname"),
                         results.getString("pesel"),

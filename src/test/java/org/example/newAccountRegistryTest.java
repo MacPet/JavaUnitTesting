@@ -8,7 +8,6 @@ import org.mockito.MockedStatic;
 import static org.mockito.Mockito.*;
 
 import java.sql.DriverManager;
-import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 
@@ -20,15 +19,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class newAccountRegistryTest {
 
     //<editor-fold desc="Variables and streams">
-    KontoOsobiste exampleAccount = new KontoOsobiste("a", "a", "10000000000", "PROM_123");
-    KontoOsobiste exampleAccount2 = new KontoOsobiste("b", "a", "20000000000", "PROM_321");
-    KontoOsobiste exampleAccount3 = new KontoOsobiste("b", "a", "30000000000", "PROM_321");
+    PrivateAccount exampleAccount = new PrivateAccount("a", "a", "10000000000", "PROM_123");
+    PrivateAccount exampleAccount2 = new PrivateAccount("b", "a", "20000000000", "PROM_321");
+    PrivateAccount exampleAccount3 = new PrivateAccount("b", "a", "30000000000", "PROM_321");
     public static Stream<Arguments> correctAccounts() {
         return Stream.of(
-                Arguments.of(new KontoOsobiste("a", "a", "10000000000", "PROM_123")),
-                Arguments.of(new KontoOsobiste("b", "a", "20000000000", "PROM_321")),
-                Arguments.of(new KontoOsobiste("c", "a", "30000000000", "PROM_000")),
-                Arguments.of(new KontoOsobiste("d", "a", "40000000000", "PROM_999"))
+                Arguments.of(new PrivateAccount("a", "a", "10000000000", "PROM_123")),
+                Arguments.of(new PrivateAccount("b", "a", "20000000000", "PROM_321")),
+                Arguments.of(new PrivateAccount("c", "a", "30000000000", "PROM_000")),
+                Arguments.of(new PrivateAccount("d", "a", "40000000000", "PROM_999"))
 
         );
 
@@ -49,7 +48,7 @@ class newAccountRegistryTest {
 
     @ParameterizedTest
     @MethodSource("correctAccounts")
-    void registryMustSupportAdding(KontoOsobiste account){
+    void registryMustSupportAdding(PrivateAccount account){
 
         newAccountRegistry.add(account);
         assertEquals(newAccountRegistry.getLast().getPesel(), account.getPesel(), "Account was supposed to be added to the end of the lsit, but wasnt");
@@ -61,7 +60,7 @@ class newAccountRegistryTest {
         newAccountRegistry.add(exampleAccount);
         newAccountRegistry.add(exampleAccount2);
         newAccountRegistry.add(exampleAccount3);
-        assertEquals(exampleAccount3.getImie(), newAccountRegistry.getLast().getImie());
+        assertEquals(exampleAccount3.getName(), newAccountRegistry.getLast().getName());
         assertEquals(exampleAccount3.getPesel(), newAccountRegistry.getLast().getPesel());
     }
 
@@ -112,10 +111,10 @@ class newAccountRegistryTest {
   void updateShouldUpdateDatabase(){
         double newAmount = 100100;
     newAccountRegistry.add(exampleAccount);
-    exampleAccount.setSaldo(newAmount);
+    exampleAccount.setBalance(newAmount);
     newAccountRegistry.update(exampleAccount);
-    KontoOsobiste accountFromDB = newAccountRegistry.getByPesel(exampleAccount.getPesel()).get(0);
-    assertEquals(newAmount, accountFromDB.getSaldo());
+    PrivateAccount accountFromDB = newAccountRegistry.getByPesel(exampleAccount.getPesel()).get(0);
+    assertEquals(newAmount, accountFromDB.getBalance());
   }
 
 

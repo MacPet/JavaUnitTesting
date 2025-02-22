@@ -22,23 +22,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = Application.class)
 public class APITest {
 
+
+
     @Autowired
     private AccountController accountController;
 
     ObjectMapper mapper = new ObjectMapper();
 
     double TRANSFER_AMOUNT = 1.00;
-    final int LOOP_SIZE = 10; //ZMNIEJSZYLEM Z 100 DO 10 ABY SKROCIC SOBIE TESTY
+    final int LOOP_SIZE = 10;
 
     private MockMvc mockMvc;
 
     public String createRequestJSON(String pesel, int i, double saldo){
         return
                 "{ " + "\"pesel\": \"" + pesel + "\", " +
-                        "\"imie\": \"Name" + i + "\", " +
-                        "\"nazwisko\": \"Surname" + i + "\", " +
-                        "\"saldo\":  \"" + saldo  + "\", " +
-                        "\"transactions\": [] " +  "}";
+                        "\"name\": \"Name" + i + "\", " +
+                        "\"surname\": \"Surname" + i + "\", " +
+                        "\"balance\":  \"" + saldo  + "\", " +
+                        "\"history\": [] " +  "}";
     }
 
     private String createTransferRequestJSON(Transfer transfer)  {
@@ -52,11 +54,11 @@ catch (Exception e) {
 
     }
 
-    private double extractSaldoFromResponse(String responseBody) {
+    private double extractBalanceFromResponse(String responseBody) {
 
         try {
             JsonNode rootNode = mapper.readTree(responseBody);
-            return rootNode.get("saldo").asDouble();
+            return rootNode.get("balance").asDouble();
         } catch (Exception e) {
             throw new RuntimeException("Error when extracting balance from response:", e);
         }
@@ -72,7 +74,7 @@ catch (Exception e) {
     @Test
     public void APICreateAndDeleteMustTakeLessThan500ms() throws Exception {
 
-        final long timeLimit = 1000L; // zwiekszylem do 1000 bo niestety czesto wychodzilo ok. 600ms
+        final long timeLimit = 500L;
 
 
         for (int i = 1; i <= LOOP_SIZE; i++) {
@@ -142,7 +144,7 @@ catch (Exception e) {
 
 
         String responseBody = result.getResponse().getContentAsString();
-        double finalSaldo = extractSaldoFromResponse(responseBody);
+        double finalSaldo = extractBalanceFromResponse(responseBody);
 
         assertThat(finalSaldo).isEqualTo(TRANSFER_AMOUNT * LOOP_SIZE);
     }

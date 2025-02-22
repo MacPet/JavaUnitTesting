@@ -1,6 +1,6 @@
 package org.example.springboot;
 
-import org.example.KontoOsobiste;
+import org.example.PrivateAccount;
 import org.example.newAccountRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ public class AccountController {
 
 //<editor-fold desc="Helpers>
 
-    void isEmptyCheck(List<KontoOsobiste> list) throws ResponseStatusException {
+    void isEmptyCheck(List<PrivateAccount> list) throws ResponseStatusException {
 
         if (list.isEmpty()) {
             throw new ResponseStatusException(
@@ -29,15 +29,14 @@ public class AccountController {
 //</editor-fold>
 
 
-    //GETY
     @GetMapping("/accounts/count")
     Integer numberOfAccounts() {
         return newAccountRegistry.getLength();
     }
 
     @GetMapping("/accounts/{pesel}")
-    KontoOsobiste findAccount(@PathVariable String pesel) {
-        List<KontoOsobiste> accountList = newAccountRegistry.getByPesel(pesel);
+    PrivateAccount findAccount(@PathVariable String pesel) {
+        List<PrivateAccount> accountList = newAccountRegistry.getByPesel(pesel);
 
         isEmptyCheck(accountList);
 
@@ -46,9 +45,9 @@ public class AccountController {
     }
 
     @PostMapping("/accounts")
-    void newAccount(@RequestBody KontoOsobiste newAccount) {
+    void newAccount(@RequestBody PrivateAccount newAccount) {
         newAccountRegistry.add(newAccount);
-        System.out.println(newAccount.getImie());
+        System.out.println(newAccount.getName());
     }
 
     @DeleteMapping("/accounts/{pesel}")
@@ -60,11 +59,11 @@ public class AccountController {
     @PostMapping("/accounts/{pesel}/transfer")
     void transferMoney(@RequestBody Transfer transferBody, @PathVariable String pesel) {
 
-        List<KontoOsobiste> accountList = newAccountRegistry.getByPesel(pesel);
+        List<PrivateAccount> accountList = newAccountRegistry.getByPesel(pesel);
 
         isEmptyCheck(accountList);
 
-        KontoOsobiste account = accountList.get(0);
+        PrivateAccount account = accountList.get(0);
 
         if (!Transfer.ACCEPTABLE_TYPES.contains(transferBody.type) || transferBody.amount < 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST); //400
@@ -72,21 +71,21 @@ public class AccountController {
 
 
 
-        KontoOsobiste TEMPORARY_ACCOUNT = new KontoOsobiste("a", "a", "99999999999");
-        double moneyBeforeTransfer = account.getSaldo();
+        PrivateAccount TEMPORARY_ACCOUNT = new PrivateAccount("a", "a", "99999999999");
+        double moneyBeforeTransfer = account.getBalance();
 
         switch (transferBody.type) {
             case "outgoing" -> {
-                account.przelew(TEMPORARY_ACCOUNT, transferBody.amount);
-                if (account.getSaldo() == moneyBeforeTransfer)
+                account.transfer(TEMPORARY_ACCOUNT, transferBody.amount);
+                if (account.getBalance() == moneyBeforeTransfer)
                     throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
             }
             case "express" -> {
-                account.przelewEkspresowy(TEMPORARY_ACCOUNT, transferBody.amount);
-                if (account.getSaldo() == moneyBeforeTransfer)
+                account.transferExpress(TEMPORARY_ACCOUNT, transferBody.amount);
+                if (account.getBalance() == moneyBeforeTransfer)
                     throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
             }
-            case "incoming" -> account.setSaldo(account.getSaldo() + transferBody.amount);
+            case "incoming" -> account.setBalance(account.getBalance() + transferBody.amount);
         }
 
 

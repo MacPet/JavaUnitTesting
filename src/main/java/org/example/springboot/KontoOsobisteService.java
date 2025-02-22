@@ -1,9 +1,9 @@
 package org.example.springboot;
 
-import org.example.KontoOsobiste;
+import org.example.PrivateAccount;
 
 public interface KontoOsobisteService {
 
-    public KontoOsobiste saveUpdatePerson(KontoOsobiste konto);
-    public KontoOsobiste findPersonById(Integer id);
+    public PrivateAccount saveUpdatePerson(PrivateAccount konto);
+    public PrivateAccount findPersonById(Integer id);
 }

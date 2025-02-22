@@ -12,7 +12,7 @@ public class BlackList {
     private static final String DB_PASSWORD = "test";
 
     public static void clear() {
-        String query = "DELETE FROM black_list";
+         String query = "DELETE FROM black_list";
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate(query);
